@@ -19,6 +19,6 @@ node-gyp clean
 node-gyp configure --arch=arm -- -I ../../../crosscompile.gypi
 node-gyp build
 
-zip ../../bindings-v$VERSION-$RUNTIME_ABI-arm7.zip build/Release/bindings.node
+tar -czf ../../bindings-v$VERSION-$RUNTIME_ABI-armv7.tar.gz build/Release/bindings.node
 
 rm -rf $WORK_DIR

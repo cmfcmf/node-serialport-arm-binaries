@@ -51,4 +51,4 @@ echo $ABI_VERSIONS | jq -r -c '.[]' | while read LINE; do
 done
 
 gh release delete bindings -y || true
-gh release create bindings build/bindings-* --title bindings --notes "---"
+gh release create bindings build/bindings-*.tar.gz --title bindings --notes "---"
