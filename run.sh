@@ -30,9 +30,9 @@ echo $ABI_VERSIONS | jq -r -c '.[]' | while read LINE; do
     echo $TARGET
     echo $ABI
 
-    nvm install $TARGET
-    nvm use $TARGET
-    node-gyp install $TARGET
+    nvm install $(echo $TARGET | cut -f1 -d".")
+    nvm use $(echo $TARGET | cut -f1 -d".")
+    node-gyp install $(echo $TARGET | cut -f1 -d".")
 
     pids=""
 
@@ -50,3 +50,5 @@ echo $ABI_VERSIONS | jq -r -c '.[]' | while read LINE; do
     sleep 20
 done
 
+gh release delete bindings -y || true
+gh release create bindings build/bindings-* --title bindings --notes "---"
