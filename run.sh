@@ -5,7 +5,7 @@ set -ev
 source $HOME/.nvm/nvm.sh
 nvm install 15
 nvm use 15
-npm install -g node-gyp
+npm install
 
 VERSIONS=$(npm view @serialport/bindings versions --json)
 ABI_VERSIONS=$(node node-abi-versions.js)
@@ -21,6 +21,10 @@ else
     git clone --depth 1 https://github.com/raspberrypi/tools.git raspberry-tools
 fi
 
+verlte() {
+    [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
+}
+
 echo $ABI_VERSIONS | jq -r -c '.[]' | while read LINE; do
     RUNTIME=$(echo $LINE | jq -r -c '.runtime')
     TARGET=$(echo $LINE | jq -r -c '.target')
@@ -32,16 +36,20 @@ echo $ABI_VERSIONS | jq -r -c '.[]' | while read LINE; do
 
     nvm install $(echo $TARGET | cut -f1 -d".")
     nvm use $(echo $TARGET | cut -f1 -d".")
-    node-gyp install $(echo $TARGET | cut -f1 -d".")
+    $(npm bin)/node-gyp install $(echo $TARGET | cut -f1 -d".")
 
     pids=""
 
     echo $VERSIONS | jq -r -c '.[]' | while read VERSION; do
-        bash ../make_version.sh "$VERSION" "$RUNTIME-v$ABI" &
-        pids="$pids $!"
+        if verlte $VERSION 3.0.0; then
+            echo "Skipping version $VERSION"
+        else
+            bash ../make_version.sh "$VERSION" "$RUNTIME-v$ABI"
+            pids="$pids $!"
 
-        if [ $( jobs | wc -l ) -ge $( nproc ) ]; then
-            wait
+            if [ $( jobs | wc -l ) -ge $( nproc ) ]; then
+                wait
+            fi
         fi
     done
 

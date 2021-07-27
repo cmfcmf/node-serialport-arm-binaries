@@ -11,13 +11,15 @@ echo $VERSION
 rm -rf $WORK_DIR
 mkdir $WORK_DIR
 
+GYP=$(npm bin)/node-gyp
+
 npm view @serialport/bindings@$VERSION dist.tarball | xargs curl | tar -xz -C $WORK_DIR
 
 cd $WORK_DIR/package
 npm install --ignore-scripts --silent --quiet --no-progress
-node-gyp clean
-node-gyp configure --arch=arm -- -I ../../../crosscompile.gypi
-node-gyp build
+$GYP clean
+$GYP configure --arch=arm -- -I ../../../crosscompile.gypi
+$GYP build
 
 tar -czf ../../bindings-v$VERSION-$RUNTIME_ABI-armv7.tar.gz build/Release/bindings.node
 
